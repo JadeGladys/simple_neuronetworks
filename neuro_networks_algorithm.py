@@ -1,4 +1,5 @@
 import random
+import math
 
 # SETTINGS - numbers you choose yourself
 DATA_FILE = "iris.data"
@@ -28,7 +29,7 @@ def load_flowers(file_name):
             measurements = []
 
             for num in parts[0:4]:
-                measurements.append(num)
+                measurements.append(float(num))
 
             species = parts[4]
             flowers.append((measurements, species))
@@ -79,15 +80,15 @@ def create_layer(number_of_inputs, number_of_neurons, start_range, rdm):
     weights = []
     for neuron in range(number_of_neurons):
         this_neuron_weights = []
-        for index in range(number_of_inputs):
+        for _ in range(number_of_inputs):
             this_neuron_weights.append(rdm.uniform(-start_range, start_range))
         weights.append(this_neuron_weights)
 
-    bias = []
+    biases = []
     for neuron in range(number_of_neurons):
-        bias.append(rdm.uniform(-start_range, start_range))
+        biases.append(rdm.uniform(-start_range, start_range))
 
-    return {"weights": weights, "bias": bias}
+    return {"weights": weights, "biases": biases}
 
 
 def create_network(hidden1_neurons, hidden2_neurons, start_range, seed):
@@ -101,3 +102,72 @@ def create_network(hidden1_neurons, hidden2_neurons, start_range, seed):
     }
 
     return network
+
+
+# =====================================================================
+# PART 4 - forward pass
+# measurements -> hidden 1 -> hidden 2 -> output scores -> probabilities
+# =====================================================================
+def calculate_totals(layer, inputs):
+    """For every neuron: total = (each input x its weight, added up) + bias."""
+    totals = []
+    for neuron in range(len(layer["weights"])):
+        total = layer["biases"][neuron]
+        for input_index in range(len(inputs)):
+            total += inputs[input_index] * \
+                layer["weights"][neuron][input_index]
+        totals.append(total)
+
+    return totals
+
+
+def relu(totals):
+    """Negative totals become 0, positive totals stay the same."""
+    outputs = []
+
+    for total in totals:
+        if total > 0:
+            outputs.append(total)
+        else:
+            outputs.append(0.0)
+
+    return outputs
+
+
+def softmax(scores):
+    """Turn the scores into probabilities that add up to 1."""
+
+    exponents = []
+    for score in scores:
+        exponents.append(math.exp(score))   # e^score
+
+    exponents_sum = sum(exponents)
+
+    probabilities = []
+    for exponent in exponents:
+        probabilities.append(exponent / exponents_sum)
+
+    return probabilities
+
+
+def forward_pass(network, measurements):
+    """Run one flower through the network. Save everything the backward pass needs."""
+    hidden1_totals = calculate_totals(network["hidden_layer1"], measurements)
+    hidden1_outputs = relu(hidden1_totals)
+
+    hidden2_totals = calculate_totals(
+        network["hidden_layer2"], hidden1_outputs)
+    hidden2_outputs = relu(hidden2_totals)
+
+    # no ReLU on the output layer
+    scores = calculate_totals(network["output_layer"], hidden2_outputs)
+    probabilities = softmax(scores)
+
+    return {
+        "measurements": measurements,
+        "hidden1_totals": hidden1_totals,
+        "hidden1_outputs": hidden1_outputs,
+        "hidden2_totals": hidden2_totals,
+        "hidden2_outputs": hidden2_outputs,
+        "probabilities": probabilities,
+    }

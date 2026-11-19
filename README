@@ -4,7 +4,7 @@ How this file is organised:
   - PART 1 - load the iris data
   - PART 2 - prepare the data (shuffle, split into training/testing, species -> [0, 1, 0])
   - PART 3 - create the network (random starting weights and biases)
-  - PART 4 - forward pass   (Parts 2-6 of the explanation)
+  - PART 4 - forward pass   (measurements -> hidden 1 -> hidden 2 -> output scores -> probabilities)
   - PART 5 - loss           (Part 7)
   - PART 6 - backward pass  (Parts 10-15)
   - PART 7 - update         (Part 16)
