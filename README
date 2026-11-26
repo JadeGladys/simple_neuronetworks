@@ -1,13 +1,54 @@
-# Exercise 3 – Simple neural network (iris)
+# Exercise 3 - Simple neural network (iris)
 
-How this file is organised:
-  - PART 1 - load the iris data
-  - PART 2 - prepare the data (shuffle, split into training/testing, species -> [0, 1, 0])
-  - PART 3 - create the network (random starting weights and biases)
-  - PART 4 - forward pass   (measurements -> hidden 1 -> hidden 2 -> output scores -> probabilities)
-  - PART 5 - loss           (Part 7)
-  - PART 6 - backward pass  (Parts 10-15)
-  - PART 7 - update         (Part 16)
-  - PART 8 - training loop  (epochs)
-  - PART 9 - testing        (accuracy)
-  - PART 10 - experiments: try different settings, save results.csv
+A neural network built from scratch (no libraries besides `random`, `math`
+and `csv`) that classifies iris flowers by species from their 4
+measurements. Two files:
+
+  - neuro_networks_algorithm.py - the network itself
+  - experiments.py              - sweeps settings and logs results to CSV
+
+## neuro_networks_algorithm.py
+
+  - PART 1 - load the iris data            (load_flowers)
+  - PART 2 - prepare the data               (species_to_true_answer, prepare_flowers)
+                                             shuffle, split into training/testing, species -> [0, 1, 0]
+  - PART 3 - create the network             (create_layer, create_network)
+                                             random starting weights and biases
+  - PART 4 - forward pass                   (calculate_totals, relu, softmax, forward_pass)
+                                             measurements -> hidden 1 -> hidden 2 -> output scores -> probabilities
+  - PART 5 - loss                           (calculate_loss)
+                                             -ln(probability the network gave the correct species)
+  - PART 6 - backward pass                  (calculate_layer_derivatives, calculate_hidden_blames, backward_pass)
+                                             the derivative of every weight and bias, for one flower
+  - PART 7 - update                         (update_network)
+                                             new = old - learning rate x derivative
+  - PART 8 - training loop                  (train_network)
+                                             repeats forward pass -> loss -> backward pass -> update, per epoch
+  - PART 9 - testing                        (test_network)
+                                             forward pass only, returns accuracy
+
+## experiments.py
+
+Imports the functions above and runs every combination of learning rate,
+epoch count, hidden-layer size and train/test split, several times each
+(different seed per run), then averages the results.
+
+  - PART 1 - run one experiment             (run_experiment)
+                                             prepare, create, train and test one network
+  - PART 2 - run every combination          (run_all_experiments)
+                                             loops over all settings, averages NUMBER_OF_RUNS runs per combination
+  - PART 3 - save to CSV                    (save_csv, main)
+                                             writes results.csv and loss_curves.csv
+
+Settings to try are changed at the top of the file: LEARNING_RATES, EPOCHS,
+HIDDEN_NEURONS, TRAIN_SHARES, NUMBER_OF_RUNS.
+
+Run with:
+
+    python3 experiments.py
+
+Output:
+  - results.csv     - one row per settings combination (averaged accuracy,
+                       best/worst accuracy, final loss, time taken)
+  - loss_curves.csv - one row per epoch per combination, for plotting how
+                       loss drops during training
